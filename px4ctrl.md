@@ -157,7 +157,7 @@ thrust_model: 				# The model that maps thrust signal u(0~1) to real thrust forc
 ```yaml
 rotor_drag:  				# 转子阻力	
     x: 0.0  				# The reduced acceleration on each axis caused by rotor drag. Unit:(m*s^-2)/(m*s^-1).
-    						# 转子阻力引起的每个轴上的加速度降低。	
+    # 转子阻力引起的每个轴上的加速度降低。	
     y: 0.0  				# Same as above
     z: 0.0  				# Same as above
     k_thrust_horz: 0.0		# 推荐设置为0 --
