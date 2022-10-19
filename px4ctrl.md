@@ -133,21 +133,21 @@ gain:
 
 ```yaml
 thrust_model: 				# The model that maps thrust signal u(0~1) to real thrust force F(Unit:N): F=K1*Voltage^K2*(K3*u^2+(1-K3)*u). 
-							# 将归一化推力信号映射到实际推力的模型（单位N）
+    # 将归一化推力信号映射到实际推力的模型（单位N）
     print_value: false 		# display the value of “thr_scale_compensate” or “hover_percentage” during thrust model estimating.
-    						# 是否在运行推力模型时显示值
+    # 是否在运行推力模型时显示值
     accurate_thrust_model: false  
-    						# 精确的推力模型
-    						# This can always enabled if don't require accurate control performance :-)
-    						# 如果不需要精确控制性能可以始终启用该模型
+    # 精确的推力模型
+    # This can always enabled if don't require accurate control performance :-)
+    # 如果不需要精确控制性能可以始终启用该模型
     						
-    						# accurate thrust mapping parameters
-    						# 精确的推力映射参数
+    # accurate thrust mapping parameters
+    # 精确的推力映射参数
     K1: 0.7583 				# 需要精确校准！
     K2: 1.6942 				# 需要精确校准！
     K3: 0.6786 				# 需要精确校准！ K3 等于 THR_MDL_FAC 在						https://docs.px4.io/master/en/config_mc/pid_tuning_guide_multicopter.html.
     
-    						# 近似推力映射参数
+    # 近似推力映射参数
     hover_percentage: 0.30  # 推力参数在自稳模式的百分比 # *
 
 ```
