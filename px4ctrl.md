@@ -140,12 +140,11 @@ thrust_model: 				# The model that maps thrust signal u(0~1) to real thrust forc
     # 精确的推力模型
     # This can always enabled if don't require accurate control performance :-)
     # 如果不需要精确控制性能可以始终启用该模型
-    						
     # accurate thrust mapping parameters
     # 精确的推力映射参数
     K1: 0.7583 				# 需要精确校准！
     K2: 1.6942 				# 需要精确校准！
-    K3: 0.6786 				# 需要精确校准！ K3 等于 THR_MDL_FAC 在						https://docs.px4.io/master/en/config_mc/pid_tuning_guide_multicopter.html.
+    K3: 0.6786 				# 需要精确校准！ K3 等于 THR_MDL_FAC 在https://docs.px4.io/master/en/config_mc/pid_tuning_guide_multicopter.html.
     
     # 近似推力映射参数
     hover_percentage: 0.30  # 推力参数在自稳模式的百分比 # *
