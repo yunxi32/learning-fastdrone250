@@ -53,7 +53,7 @@ C:.
 
 ```
 
-启动px4ctrl节点，将==/vins_fusion/imu_propagate==映射为==/odom==，将==/position_cmd==映射为==/cmd==，加载参数文件
+启动px4ctrl节点，将`/vins_fusion/imu_propagate`映射为`/odom`，将`/position_cmd`映射为`/cmd`，加载参数文件
 
 ### thrust_calibrate.launch
 
@@ -69,7 +69,7 @@ C:.
 
 ```
 
-参数估计节点==TODO==
+参数估计节点``TODO`
 
 ## config
 
@@ -184,7 +184,7 @@ msg_timeout:				# 消息超时判断时间
 rosbag record --tcpnodelay /mavros/battery /mavros/setpoint_raw/attitude /traj_start_trigger
 ```
 
-==TODO==
+`TODO`
 
 ```python
 #!/usr/bin/env python2
@@ -309,7 +309,7 @@ if __name__ == '__main__':
         pass
 ```
 
-## ==src==
+## `src`
 
 ### px4ctrl_node.cpp
 
@@ -341,7 +341,7 @@ ros节点初始化
     ros::Duration(1.0).sleep();
 ```
 
-信号捕捉函数，全局有效（多线程）。此时按ctrl+c将不再强制中断程序，而是由程序捕捉到中断信号==SIGINT==，触发软中断，关闭ros节点。延时1s
+信号捕捉函数，全局有效（多线程）。此时按ctrl+c将不再强制中断程序，而是由程序捕捉到中断信号`SIGINT`，触发软中断，关闭ros节点。延时1s
 
 ```c++
 	Parameter_t param;
@@ -704,7 +704,7 @@ void Parameter_t::config_from_ros_handle(const ros::NodeHandle &nh)
 
 ### input.h
 
-处理读取数据，==回调函数==
+处理读取数据，`回调函数`
 
 ```c++
 #include <ros/ros.h>
@@ -914,7 +914,7 @@ RC_Data_t::RC_Data_t()
 }
 ```
 
-==ros::time(0)和ros::time::now的区别==
+`ros::time(0)和ros::time::now的区别`
 
 ![image-20221014114408902](C:\Users\20826\AppData\Roaming\Typora\typora-user-images\image-20221014114408902.png)
 
@@ -1482,6 +1482,7 @@ LinearControl::calculateControl(const Desired_State_t &des,
   // Used for thrust-accel mapping estimation
   //保存推力和对应时间
   timed_thrust_.push(std::pair<ros::Time, double>(ros::Time::now(), u.thrust));
+  //如果队列里数量超过100则将以前的出队
   while (timed_thrust_.size() > 100)
   {
     timed_thrust_.pop();
@@ -1512,32 +1513,45 @@ LinearControl::estimateThrustModel(
     const Parameter_t &param)
 {
   ros::Time t_now = ros::Time::now();
+  //如果队列里存在数据
   while (timed_thrust_.size() >= 1)
   {
     // Choose data before 35~45ms ago
+    //取出队列第一个
     std::pair<ros::Time, double> t_t = timed_thrust_.front();
+    
+    //计算这一个推力的时间点和现在时间的差值
     double time_passed = (t_now - t_t.first).toSec();
+   
+    //如果差值大于45ms
     if (time_passed > 0.045) // 45ms
     {
+        
+      //则出队,表示丢弃过时的推力
       // printf("continue, time_passed=%f\n", time_passed);
       timed_thrust_.pop();
       continue;
     }
+    //如果差值小于35ms
     if (time_passed < 0.035) // 35ms
     {
+      //表示时间还没有到
       // printf("skip, time_passed=%f\n", time_passed);
       return false;
     }
 
     /***********************************************************/
     /* Recursive least squares algorithm with vanishing memory */
+    /*                具有消失内存的递归最小二乘算法                 */
     /***********************************************************/
+    //取出时间后出队
     double thr = t_t.second;
     timed_thrust_.pop();
     
     /***********************************/
     /* Model: est_a(2) = thr1acc_ * thr */
     /***********************************/
+    //计算can'shu
     double gamma = 1 / (rho2_ + thr * P_ * thr);
     double K = gamma * P_ * thr;
     thr2acc_ = thr2acc_ + K * (est_a(2) - thr * thr2acc_);
