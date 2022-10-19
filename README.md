@@ -1,2 +1,3 @@
 # learning-fastdrone250
-关于https://github.com/ZJU-FAST-Lab/Fast-Drone-250.git学习记录
+关于 `https://github.com/ZJU-FAST-Lab/Fast-Drone-250.git` 学习记录
+    使用`Typora`打开
