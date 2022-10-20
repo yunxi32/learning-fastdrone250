@@ -990,7 +990,7 @@ void RC_Data_t::feed(mavros_msgs::RCInConstPtr pMsg)
             enter_command_mode = true;
         else if (gear < GEAR_SHIFT_VALUE)
             enter_command_mode = false;
-		//如果5通道当前值大于阈值，记录
+		//如果6通道当前值大于阈值，记录
         if (gear > GEAR_SHIFT_VALUE)
             is_command_mode = true;
         else
@@ -1036,7 +1036,7 @@ void RC_Data_t::check_validity()
 
 ##### bool RC_Data_t::check_centered()
 
-？？？
+检测拨杆的值是否在中心（可能有问题）
 
 ```c++
 bool RC_Data_t::check_centered()
@@ -1395,7 +1395,7 @@ private:
 };
 ```
 
-#### controller.cpp
+### controller.cpp
 
 ```c++
 double LinearControl::fromQuaternion2yaw(Eigen::Quaterniond q)//从四元数转为偏航角
@@ -1564,5 +1564,198 @@ LinearControl::estimateThrustModel(
   }
   return false;
 }
+```
+
+### PX4CtrlFSM.cpp
+
+```c++
+#include "PX4CtrlFSM.h"
+#include <uav_utils/converters.h>
+
+using namespace std;
+using namespace uav_utils;
+```
+
+构造函数，创建控制器
+
+```c++
+PX4CtrlFSM::PX4CtrlFSM(Parameter_t &param_, LinearControl &controller_) : param(param_), controller(controller_) /*, thrust_curve(thrust_curve_)*/
+{
+	state = MANUAL_CTRL;
+	hover_pose.setZero();
+}
+```
+
+控制流程
+
+```c++
+/* 
+        Finite State Machine
+
+	      system start
+	            |
+	            |
+	            v
+	----- > MANUAL_CTRL <-----------------
+	|         ^   |    \                 |
+	|         |   |     \                |
+	|         |   |      > AUTO_TAKEOFF  |
+	|         |   |        /             |
+	|         |   |       /              |
+	|         |   |      /               |
+	|         |   v     /                |
+	|       AUTO_HOVER <                 |
+	|         ^   |  \  \                |
+	|         |   |   \  \               |
+	|         |	  |    > AUTO_LAND -------
+	|         |   |
+	|         |   v
+	-------- CMD_CTRL
+
+*/
+```
+
+#### void PX4CtrlFSM::process()
+
+开始控制进程
+
+```C++
+	ros::Time now_time = ros::Time::now();//记录时间
+	Controller_Output_t u;//创建控制器输出
+	Desired_State_t des(odom_data);//调用构造函数（在controller中）
+	bool rotor_low_speed_during_land = false;//标记？？？
+```
+
+对state进行判断
+
+##### MANUAL_CTRL
+
+尝试跳出遥控器控制模式
+
+```c++
+		//读取遥控器数据，对应如果5通道当前值大于阈值，上一次的值小于阈值。尝试跳转导自动模式
+		if (rc_data.enter_hover_mode) // Try to jump to AUTO_HOVER
+		{
+            //使用当前时间查询里程计是否存在，如果不存在发出警告，并且退出这次switch判断
+			if (!odom_is_received(now_time))
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_HOVER(L2). No odom!");
+				break;
+			}
+            //同上查询控制指令
+			if (cmd_is_received(now_time))
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_HOVER(L2). You are sending commands before toggling into AUTO_HOVER, which is not allowed. Stop sending commands now!");
+				break;
+			}
+            //判断里程计数据是否在合理的启动速度范围内
+			if (odom_data.v.norm() > 3.0)
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_HOVER(L2). Odom_Vel=%fm/s, which seems that the locolization module goes wrong!", odom_data.v.norm());
+				break;
+			}
+			//如果上述条件满足则准备跳转到自动模式
+			state = AUTO_HOVER;
+            //调用controller重置油门
+			controller.resetThrustMapping();
+            //？？？
+			set_hov_with_odom();
+			toggle_offboard_mode(true);
+			//给出模式跳转提示
+			ROS_INFO("\033[32m[px4ctrl] MANUAL_CTRL(L1) --> AUTO_HOVER(L2)\033[32m");
+		}
+```
+
+如果跳转自动模式失败，开始尝试跳转到
+
+```c++
+		//如参数中允许自动起飞，且input中收到了起飞指令，尝试自动起飞模式
+		else if (param.takeoff_land.enable && takeoff_land_data.triggered && takeoff_land_data.takeoff_land_cmd == quadrotor_msgs::TakeoffLand::TAKEOFF) // Try to jump to AUTO_TAKEOFF
+		{
+            //同上判断里程计消息状态
+			if (!odom_is_received(now_time))
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_TAKEOFF. No odom!");
+				break;
+			}
+            //判断控制指令状态
+			if (cmd_is_received(now_time))
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_TAKEOFF. You are sending commands before toggling into AUTO_TAKEOFF, which is not allowed. Stop sending commands now!");
+				break;
+			}
+            //判断当前速度是否基本静止
+			if (odom_data.v.norm() > 0.1)
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_TAKEOFF. Odom_Vel=%fm/s, non-static takeoff is not allowed!", odom_data.v.norm());
+				break;
+			}
+            //检测是否在地面
+			if (!get_landed())
+			{
+				ROS_ERROR("[px4ctrl] Reject AUTO_TAKEOFF. land detector says that the drone is not landed now!");
+				break;
+			}
+            //检测遥控器是否连接
+			if (rc_is_received(now_time)) // Check this only if RC is connected.
+			{
+                //要求5通道6通道的值大于阈值，且拨杆的值正常（5通道代表自动？6通道代表指令控制）
+				if (!rc_data.is_hover_mode || !rc_data.is_command_mode || !rc_data.check_centered())
+				{
+					ROS_ERROR("[px4ctrl] Reject AUTO_TAKEOFF. If you have your RC connected, keep its switches at \"auto hover\" and \"command control\" states, and all sticks at the center, then takeoff again.");
+                    //等待遥控器进入要求状态，会一直卡在此处
+					while (ros::ok())
+					{
+						ros::Duration(0.01).sleep();
+						ros::spinOnce();
+						if (rc_data.is_hover_mode && rc_data.is_command_mode && rc_data.check_centered())
+						{
+							ROS_INFO("\033[32m[px4ctrl] OK, you can takeoff again.\033[32m");
+							break;
+						}
+					}
+					break;
+				}
+			}
+			//满足以上要求后准备进入自动起飞状态
+			state = AUTO_TAKEOFF;
+            //重置油门
+			controller.resetThrustMapping();
+            //使用里程计数据初始化
+			set_start_pose_for_takeoff_land(odom_data);
+            //在解锁状态前切换到offboard模式
+			toggle_offboard_mode(true);				  // toggle on offboard before arm
+            //等待0.1秒用于飞控切换模式
+			for (int i = 0; i < 10 && ros::ok(); ++i) // wait for 0.1 seconds to allow mode change by FMU // mark
+			{
+				ros::Duration(0.01).sleep();
+				ros::spinOnce();
+			}
+            //查看参数表中是否允许自动起飞
+			if (param.takeoff_land.enable_auto_arm)
+			{
+                //解锁
+				toggle_arm_disarm(true);
+			}
+            //记录起飞时间
+			takeoff_land.toggle_takeoff_land_time = now_time;
+			//给出模式跳转提示
+			ROS_INFO("\033[32m[px4ctrl] MANUAL_CTRL(L1) --> AUTO_TAKEOFF\033[32m");
+		}
+```
+
+如果遥控器触发8通道，开始尝试重启
+
+```c++
+		if (rc_data.toggle_reboot) // Try to reboot. EKF2 based PX4 FCU requires reboot when its state estimator goes wrong.
+		{
+            //检测状态中是否上锁，如果不上锁开始重启
+			if (state_data.current_state.armed)
+			{
+				ROS_ERROR("[px4ctrl] Reject reboot! Disarm the drone first!");
+				break;
+			}
+			reboot_FCU();
+		}
 ```
 
