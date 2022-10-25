@@ -1759,3 +1759,166 @@ PX4CtrlFSM::PX4CtrlFSM(Parameter_t &param_, LinearControl &controller_) : param(
 		}
 ```
 
+##### AUTO_HOVER
+
+```c++
+		//检测遥控器5通道是否高于阈值，里程计是否有数据
+		if (!rc_data.is_hover_mode || !odom_is_received(now_time))
+		{
+            //如果不满足条件则跳出自动模式，并结束offoard模式
+			state = MANUAL_CTRL;
+			toggle_offboard_mode(false);
+
+			ROS_WARN("[px4ctrl] AUTO_HOVER(L2) --> MANUAL_CTRL(L1)");
+		}
+		//检测遥控器六通道是否高于阈值，允许指令控制，检测是否接收到指令
+		else if (rc_data.is_command_mode && cmd_is_received(now_time))
+		{
+            //如果满足条件，且处于offoard模式
+			if (state_data.current_state.mode == "OFFBOARD")
+			{
+                //将模式切换到指令控制模式
+				state = CMD_CTRL;
+				des = get_cmd_des();
+				ROS_INFO("\033[32m[px4ctrl] AUTO_HOVER(L2) --> CMD_CTRL(L3)\033[32m");
+			}
+		}
+		//检测起飞标记是否激活，并且接受到起飞降落信号
+		else if (takeoff_land_data.triggered && takeoff_land_data.takeoff_land_cmd == quadrotor_msgs::TakeoffLand::LAND)
+		{
+			//进入自动降落模式，初始化降落位姿
+			state = AUTO_LAND;
+			set_start_pose_for_takeoff_land(odom_data);
+
+			ROS_INFO("\033[32m[px4ctrl] AUTO_HOVER(L2) --> AUTO_LAND\033[32m");
+		}
+		//如果以上都没有满足
+		else
+		{
+            //使用遥控器控制悬停
+			set_hov_with_rc();
+			des = get_hover_des();
+            //如果遥控器6通道满足条件，或者当前时间大于起飞时间
+			if ((rc_data.enter_command_mode) ||
+				(takeoff_land.delay_trigger.first && now_time > takeoff_land.delay_trigger.second))
+			{
+				takeoff_land.delay_trigger.first = false;
+                //发布里程计数据
+				publish_trigger(odom_data.msg);
+				ROS_INFO("\033[32m[px4ctrl] TRIGGER sent, allow user command.\033[32m");
+			}
+
+			// cout << "des.p=" << des.p.transpose() << endl;
+		}
+```
+
+##### CMD_CTRL
+
+```c++
+		//同上模式切换
+		if (!rc_data.is_hover_mode || !odom_is_received(now_time))
+		{
+			state = MANUAL_CTRL;
+			toggle_offboard_mode(false);
+
+			ROS_WARN("[px4ctrl] From CMD_CTRL(L3) to MANUAL_CTRL(L1)!");
+		}
+		else if (!rc_data.is_command_mode || !cmd_is_received(now_time))
+		{
+			state = AUTO_HOVER;
+			set_hov_with_odom();
+			des = get_hover_des();
+			ROS_INFO("[px4ctrl] From CMD_CTRL(L3) to AUTO_HOVER(L2)!");
+		}
+		else
+		{
+			des = get_cmd_des();
+		}
+		//检测起飞指令是否按要求顺序发布
+		if (takeoff_land_data.triggered && takeoff_land_data.takeoff_land_cmd == quadrotor_msgs::TakeoffLand::LAND)
+		{
+			ROS_ERROR("[px4ctrl] Reject AUTO_LAND, which must be triggered in AUTO_HOVER. \
+					Stop sending control commands for longer than %fs to let px4ctrl return to AUTO_HOVER first.",
+					  param.msg_timeout.cmd);
+		}
+```
+
+##### AUTO_TAKEOFF
+
+```c++
+		//等待电机初始化
+		if ((now_time - takeoff_land.toggle_takeoff_land_time).toSec() < AutoTakeoffLand_t::MOTORS_SPEEDUP_TIME) // Wait for several seconds to warn prople.
+		{
+			des = get_rotor_speed_up_des(now_time);
+		}
+		//如果当前高度大于初始起飞高度加目标起飞高度
+		else if (odom_data.p(2) >= (takeoff_land.start_pose(2) + param.takeoff_land.height)) // reach the desired height
+		{
+            //跳转回自动模式
+			state = AUTO_HOVER;
+			set_hov_with_odom();
+			ROS_INFO("\033[32m[px4ctrl] AUTO_TAKEOFF --> AUTO_HOVER(L2)\033[32m");
+			//标记起飞记录起飞时间
+			takeoff_land.delay_trigger.first = true;
+			takeoff_land.delay_trigger.second = now_time + ros::Duration(AutoTakeoffLand_t::DELAY_TRIGGER_TIME);
+		}
+		//请求起飞
+		else
+		{
+			des = get_takeoff_land_des(param.takeoff_land.speed);
+		}
+```
+
+##### AUTO_LAND
+
+```c++
+		//同上模式切换
+		if (!rc_data.is_hover_mode || !odom_is_received(now_time))
+		{
+			state = MANUAL_CTRL;
+			toggle_offboard_mode(false);
+
+			ROS_WARN("[px4ctrl] From AUTO_LAND to MANUAL_CTRL(L1)!");
+		}
+		else if (!rc_data.is_command_mode)
+		{
+			state = AUTO_HOVER;
+			set_hov_with_odom();
+			des = get_hover_des();
+			ROS_INFO("[px4ctrl] From AUTO_LAND to AUTO_HOVER(L2)!");
+		}
+		//如果m
+		else if (!get_landed())
+		{
+			des = get_takeoff_land_des(-param.takeoff_land.speed);
+		}
+		else
+		{
+			rotor_low_speed_during_land = true;
+
+			static bool print_once_flag = true;
+			if (print_once_flag)
+			{
+				ROS_INFO("\033[32m[px4ctrl] Wait for abount 10s to let the drone arm.\033[32m");
+				print_once_flag = false;
+			}
+
+			if (extended_state_data.current_extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND) // PX4 allows disarm after this
+			{
+				static double last_trial_time = 0; // Avoid too frequent calls
+				if (now_time.toSec() - last_trial_time > 1.0)
+				{
+					if (toggle_arm_disarm(false)) // disarm
+					{
+						print_once_flag = true;
+						state = MANUAL_CTRL;
+						toggle_offboard_mode(false); // toggle off offboard after disarm
+						ROS_INFO("\033[32m[px4ctrl] AUTO_LAND --> MANUAL_CTRL(L1)\033[32m");
+					}
+
+					last_trial_time = now_time.toSec();
+				}
+			}
+		}
+```
+
