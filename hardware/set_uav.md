@@ -1,36 +1,61 @@
+# 飞控设置
+
+## 固件烧写
+
+下载QGC：[QGC - QGroundControl - Drone Control](http://qgroundcontrol.com/)
+
+打开QGC到该界面
+
+![屏幕截图 2022-12-17 162921](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 162921.png)
+
+刷入PX4最新发布版固件。
+
+如需刷入老板固件则在该网站下载：[Releases · PX4/PX4-Autopilot (github.com)](https://github.com/PX4/PX4-Autopilot/releases)
+
+## 飞控初始化设置
+
+按照QGC软件提示分别设置
+
+**机架**为X8型
+
+![屏幕截图 2022-12-17 163740](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 163740.png)
+
+按提示校准标红的传感器
+
+校准遥控器
+
+![屏幕截图 2022-12-17 163759](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 163759.png)
+
+设置飞行模式以及7通道断电
+
+![屏幕截图 2022-12-17 163834](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 163834.png)
+
+设置电源
+
+![屏幕截图 2022-12-17 164836](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 164836.png)
+
 ## QGC相关参数更改
 
-`dshort_config` 调整电机
+`CBRK_USB_CHK`为197848 为了让插了USB之后还可以解锁
 
-`CBRK_USB_CHK` 为了让插了USB之后还可以解锁
+`CBRK_IO_SAFETY` 为22027 跳过安全开关
 
-`CBRK_IO_SAFETY` 跳过安全开关
+`CBRK_SUPPLY_CHK` 为894281 跳过电源检测
 
-`SYS_TEL1_BAUD`改串口波特率
+`SYS_TEL1_BAUD`为921600 改串口波特率
 
-![](img/QQ图片20221216183141.jpg)
+`EKF2_HGT_MODE`
 
+![屏幕截图 2022-12-17 165420](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 165420.png)
 
+`EKF2_AID_MASK`
 
-## 怎么调电机顺序
+![屏幕截图 2022-12-17 165457](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 165457.png)
 
-### QGC确定电机顺序,和顺逆时针
+## 调整电机转向
 
-![](img/444.jpg)
+转向见桨叶安装
 
-白色是地线，下面是信号线，插好后是蓝色
+在此界面逐个测试电机，若电机转向错误，任意调换该电机的两根三相电源线。切记带电调试勿安装桨叶
 
-电机顺序如果反了，就调信号线
-
-![](img/333.jpg)
-
-*顺逆时针反了就在QGC中输命令*
-
-命令1是调顺逆时针，1可替换未2 3 4
-
-命令二是保存
-
-![](img/222.jpg)
-
-![](img/111.jpg)
-
+![屏幕截图 2022-12-17 165919](C:\Users\20826\Documents\GitHub\learning-px4ctrl\hardware\img\屏幕截图 2022-12-17 165919.png)
