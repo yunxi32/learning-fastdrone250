@@ -1,4 +1,4 @@
-# px4ctrl
+#  px4ctrl
 
 ## 文件组成
 
@@ -1887,27 +1887,29 @@ PX4CtrlFSM::PX4CtrlFSM(Parameter_t &param_, LinearControl &controller_) : param(
 			des = get_hover_des();
 			ROS_INFO("[px4ctrl] From AUTO_LAND to AUTO_HOVER(L2)!");
 		}
-		//如果m
+		//检测是否在地面
 		else if (!get_landed())
 		{
+            //如果不在地面，使用起飞速度相反数请求降落
 			des = get_takeoff_land_des(-param.takeoff_land.speed);
 		}
 		else
 		{
 			rotor_low_speed_during_land = true;
-
+			//只打印一次输出
 			static bool print_once_flag = true;
 			if (print_once_flag)
 			{
 				ROS_INFO("\033[32m[px4ctrl] Wait for abount 10s to let the drone arm.\033[32m");
 				print_once_flag = false;
 			}
-
+			//锁上飞机
 			if (extended_state_data.current_extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND) // PX4 allows disarm after this
 			{
 				static double last_trial_time = 0; // Avoid too frequent calls
 				if (now_time.toSec() - last_trial_time > 1.0)
 				{
+                    //如果锁上飞机，推出降落模式
 					if (toggle_arm_disarm(false)) // disarm
 					{
 						print_once_flag = true;
@@ -1920,5 +1922,50 @@ PX4CtrlFSM::PX4CtrlFSM(Parameter_t &param_, LinearControl &controller_) : param(
 				}
 			}
 		}
+```
+
+##### 其他控制
+
+```c++
+	//估计油门模式
+// STEP2: estimate thrust model
+	if (state == AUTO_HOVER || state == CMD_CTRL)
+	{
+		// controller.estimateThrustModel(imu_data.a, bat_data.volt, param);
+		controller.estimateThrustModel(imu_data.a,param);
+
+	}
+	
+	if (rotor_low_speed_during_land) // used at the start of auto takeoff
+	{
+		motors_idling(imu_data, u);
+	}
+	else
+	{
+		debug_msg = controller.calculateControl(des, odom_data, imu_data, u);
+		debug_msg.header.stamp = now_time;
+		debug_pub.publish(debug_msg);
+	}
+	//向mavros发布控制指令
+	// STEP4: publish control commands to mavros
+	if (param.use_bodyrate_ctrl)
+	{
+		publish_bodyrate_ctrl(u, now_time);
+	}
+	else
+	{
+		publish_attitude_ctrl(u, now_time);
+	}
+	
+	// STEP5: Detect if the drone has landed
+	land_detector(state, des, odom_data);
+	// cout << takeoff_land.landed << " ";
+	// fflush(stdout);
+	//结束后清楚标志位
+	// STEP6: Clear flags beyound their lifetime
+	rc_data.enter_hover_mode = false;
+	rc_data.enter_command_mode = false;
+	rc_data.toggle_reboot = false;
+	takeoff_land_data.triggered = false;
 ```
 
