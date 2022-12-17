@@ -22,7 +22,7 @@
 
 ### 修改配置文件
 
-`sudo chmod 666 /etc/environment`
+
 
 `sodo gedit /etc/environment`
 
@@ -32,4 +32,3 @@
 
 ### 保存
 
-`sudo chmod 444 /etc/environment`
