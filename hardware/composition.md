@@ -4,7 +4,7 @@
 
 通用无人机接线，在我们项目中不需要一些东西，如数传、图传、GNSS等，具体接线见后续。
 
-![quickstart_01](C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\quickstart_01.jpg)
+![quickstart_01](../img\quickstart_01.jpg)
 
 ## 电机
 
@@ -38,7 +38,7 @@
 
 飞控是飞行过程中底层的控制，由它控制飞行的姿态路径等。通过飞控的typc接口连接机载电脑进行高层次的控制。其他接线见分电板
 
-![nora](../GitHub\learning-px4ctrl\img\nora.png)
+![nora](../img\nora.png)
 
 
 
@@ -75,7 +75,7 @@
 
 由于采用八轴无人机，各桨叶转向如下。
 
-![微信图片_20221217155325](../learning-px4ctrl\img\微信图片_20221217155325.png)
+![微信图片_20221217155325](../img\微信图片_20221217155325.png)
 
 
 
