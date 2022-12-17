@@ -6,11 +6,11 @@
 
 [clash]: https://github.com/Fndroid/clash_for_windows_pkg/releases/tag/0.17.
 
-![](../img/QQ图片20221216185120.jpg)
+![](../img/clash1.jpg)
 
 ### 打开clash
 
-![](../img/QQ图片20221216185124.jpg)
+![](../img/clash2.jpg)
 
 `cd clash`
 
