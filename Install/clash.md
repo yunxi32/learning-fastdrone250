@@ -6,19 +6,17 @@
 
 [clash]: https://github.com/Fndroid/clash_for_windows_pkg/releases/tag/0.17.
 
-![](img/QQ图片20221216185120.jpg)
+![](../img/QQ图片20221216185120.jpg)
 
 ### 打开clash
 
-![](img/QQ图片20221216185124.jpg)
+![](../img/QQ图片20221216185124.jpg)
 
 `cd clash`
 
 `./cfw`
 
 设置clah
-
-![](../../25895336-9667850b01c82b6c.webp)
 
 ### 修改配置文件
 

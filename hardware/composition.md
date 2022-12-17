@@ -10,11 +10,11 @@
 
 由于需要搭载较重负载，我们选用8个电机组成x8形无人机，电机需要关注的参数有kv值，对应电压、以及电流。
 
-<img src="C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\微信图片_20221217153759.jpg" alt="微信图片_20221217153759" style="zoom: 50%;" />
+<img src="../img\微信图片_20221217153759.jpg" alt="微信图片_20221217153759" style="zoom: 50%;" />
 
 这是这款电机的参数表：
 
-![微信图片_20221217153811](C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\微信图片_20221217153811.jpg)
+![微信图片_20221217153811](../img\微信图片_20221217153811.jpg)
 
 ## 电调
 
@@ -22,7 +22,7 @@
 
 该电调不支持dshot协议，所以调整电机转向仅能通过交换电机连接的三相线来解决
 
-<img src="C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\20190123022745494.jpg" alt="20190123022745494" style="zoom:50%;" />
+<img src="../img\20190123022745494.jpg" alt="20190123022745494" style="zoom:50%;" />
 
 ## 电源
 
@@ -38,7 +38,7 @@
 
 飞控是飞行过程中底层的控制，由它控制飞行的姿态路径等。通过飞控的typc接口连接机载电脑进行高层次的控制。其他接线见分电板
 
-![nora](C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\nora.png)
+![nora](../GitHub\learning-px4ctrl\img\nora.png)
 
 
 
@@ -75,7 +75,7 @@
 
 由于采用八轴无人机，各桨叶转向如下。
 
-![微信图片_20221217155325](C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\微信图片_20221217155325.png)
+![微信图片_20221217155325](../learning-px4ctrl\img\微信图片_20221217155325.png)
 
 
 
@@ -83,4 +83,4 @@
 
 分电板将总电源分到各个模块，要求能通过的最大电流尽可能较大，实际我们的接线如下。
 
-![微信图片_20221217161757](C:\Users\20826\Documents\GitHub\learning-px4ctrl\img\微信图片_20221217161757.jpg)
+![微信图片_20221217161757](../img\微信图片_20221217161757.jpg)
