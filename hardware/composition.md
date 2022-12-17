@@ -43,19 +43,33 @@
 
 
 **POWER A**	连接电源PM模块；具有电源输入&AD电压电流检测功能(默认使用该接口）
+
 **POWER C**	请将CAN PMU SE连接到此接口；该接口连接UAVCAN电源模块
+
 **GPS&SAFETY**	连接Neo Gps,它包含GPS、安全开关、蜂鸣器接口
+
 **UART 4**	可用于连接GPS,可作为第二个GPS
+
 **TELEM1/TELME2**	连接数传等，用于MAVLINK交互数据
+
 **TF CARD**	插入SD卡，可实现日志存储功能
+
 **M1~M14**	PWM信号输出口，可用于控制电机或舵机；并且M1~M12还支持dshot协议
+
 **DSU7**	用于FMU芯片调试，读取DEBUG设备信息
+
 **TYPE-C(USB)**	连接电脑，用于飞控与电脑的通信，比如烧录固件
+
 **USB**	连接电脑，用于飞控与电脑的通信，比如下载日志
+
 **I2C1/I2C2/i2C4**	连接外置指南针等I2C设备，用于飞控与I2C设备的通信
+
 **CAN1/CAN2**	连接CAN GPS等UAVCAN设备，用于飞控与UAVCAN设备的通信（比如连接NEO V2 pro uavcan GPS)
+
 **RC IN**	包含DSM、SBUS、RSSI信号输入接口，DSM接口可以连接DSM卫星接收机、SBUS接口连接SBUS遥控器接收机
+
 **RSSI**	用于连接信号强度回传模块
+
 
 ## 桨叶
 
