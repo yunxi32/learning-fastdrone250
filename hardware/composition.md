@@ -4,7 +4,7 @@
 
 通用无人机接线，在我们项目中不需要一些东西，如数传、图传、GNSS等，具体接线见后续。
 
-![quickstart_01](../img\quickstart_01.jpg)
+![](../img/quickstart_01.jpg)
 
 ## 电机
 
