@@ -78,7 +78,7 @@ wget http://fishros.com/install -O fishros && . fishros
 
 #### fastdrone250安装配置
 
-
+[learning-fastdrone250/fastdrone250.md at main · KayatoDQY/learning-fastdrone250 (github.com)](https://github.com/KayatoDQY/learning-fastdrone250/blob/main/Install/fastdrone250.md)
 
 #### fastlio安装配置
 
