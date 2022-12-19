@@ -14,7 +14,7 @@
 
 需要学会使用以下模块：
 
-[Fast-Drone-250/src/planner/plan_manage/launch at master · ZJU-FAST-Lab/Fast-Drone-250 (github.com)](https://github.com/ZJU-FAST-Lab/Fast-Drone-250/tree/master/src/planner/plan_manage/launch)其中包含了ego-planer的仿真和试飞启动文件
+[Fast-Drone-250/src/planner at master · ZJU-FAST-Lab/Fast-Drone-250 (github.com)](https://github.com/ZJU-FAST-Lab/Fast-Drone-250/tree/master/src/planner)其中包含了ego-planer的仿真和试飞启动文件
 
 [hku-mars/FAST_LIO: A computationally efficient and robust LiDAR-inertial odometry (LIO) package (github.com)](https://github.com/hku-mars/FAST_LIO)激光slam（我们采用的方案）
 
@@ -38,19 +38,47 @@
 
 ### 常用软件安装
 
-clash
+#### clash
 
-nomechine
+[learning-fastdrone250/clash.md at main · KayatoDQY/learning-fastdrone250 (github.com)](https://github.com/KayatoDQY/learning-fastdrone250/blob/main/Install/clash.md)
 
-vscode
+#### nomechine
 
-ssh
+远程投屏软件，需要在机载电脑插上HDMI欺骗器，地面端和机载端都需要安装
+
+```shell
+sudo dpkg -i 安装包名字
+```
+
+[NoMachine - Free Remote Desktop for Everybody](https://www.nomachine.com/)
+
+#### vscode
+
+[Visual Studio Code - Code Editing. Redefined](https://code.visualstudio.com/)
+
+#### ssh
+
+```shell
+sudo apt install openssh-server
+```
+
+#### Terminator
+
+```shell
+sudo apt install terminator
+```
 
 ### 代码部署和环境配置
 
-ros
+#### ros
+
+```shell
+wget http://fishros.com/install -O fishros && . fishros
+```
 
 #### fastdrone250安装配置
+
+
 
 #### fastlio安装配置
 

@@ -4,13 +4,9 @@
 
 点开链接,选择clash for windows的linux版本
 
-[clash]: https://github.com/Fndroid/clash_for_windows_pkg/releases/tag/0.17.
-
-![](../img/clash1.jpg)
+[Releases · Dreamacro/clash (github.com)](https://github.com/Dreamacro/clash/releases)
 
 ### 打开clash
-
-![](../img/clash2.jpg)
 
 `cd clash`
 
