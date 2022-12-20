@@ -57,8 +57,11 @@ sudo ./install_geographiclib_datasets.sh
 cd glog
 sudo chmod 777./autogen.sh
 sudo chmod 777 ./configure
-./autogen.sh && ./configure && make && sudo make install
-sudo apt-get install liblapack-dev libsuitesparse-dev libcxsparse3.1.2 libgflags-dev libgoogle-glog-dev libgtest-dev
+./autogen.sh
+./configure 
+make 
+sudo make install
+sudo apt-get install liblapack-dev libsuitesparse-dev libcxsparse3 libgflags-dev libgoogle-glog-dev libgtest-dev
 ```
 
 ```shell
