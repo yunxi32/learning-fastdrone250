@@ -1,4 +1,4 @@
-# yoloV7 训练与部署
+# yoloV7 训练
 
 ## 主机端训练
 
@@ -138,7 +138,4 @@ python train.py --batch 30 --epochs 150 --data {数据集地址}/data.yaml --wei
 
 ### 结果分析
 
-
-
-## 机载电脑部署
 

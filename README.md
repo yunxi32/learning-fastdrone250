@@ -82,11 +82,13 @@ wget http://fishros.com/install -O fishros && . fishros
 
 #### fastlio安装配置
 
+[learning-fastdrone250/fast-lio.md at main · KayatoDQY/learning-fastdrone250 (github.com)](https://github.com/KayatoDQY/learning-fastdrone250/blob/main/Install/fast-lio.md)
+
 #### yolov7训练与部署
 
 ##### 训练环境安装
 
-在windows上进行
+
 
 ##### 部署到ros上
 
